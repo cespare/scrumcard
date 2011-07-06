@@ -1,4 +1,9 @@
 GET /api/rooms/<roomname> -> [json] serve up page data (heartbeat api call)
+ :user => <username>,
+ :room => <room-name>,
+ :votes => {
+   <username> => <vote>
+ }
 GET /api/rooms -> [json] list of room names
 POST /api/rooms/<roomname> body is json vote info
 POST /api/rooms/<roomname>/reset empty body; reset the votes
