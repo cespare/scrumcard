@@ -12,3 +12,4 @@ POST /api/rooms/<roomname>/login?redirect_to=<url>
 
 GET /rooms/<roomname> serve up main room page; bounce to / if the username cookie is not set
 GET / view of all the rooms
+GET /login
