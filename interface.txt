@@ -3,4 +3,5 @@ GET /api/rooms -> [json] list of room names
 POST /api/rooms/<roomname> body is json vote info
 POST /api/rooms/<roomname>/reset empty body; reset the votes
 
-GET /room/<roomname> serve up main room page
+GET /rooms/<roomname> serve up main room page; bounce to / if the username cookie is not set
+GET / view of all the rooms
