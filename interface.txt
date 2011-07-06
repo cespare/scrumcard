@@ -6,7 +6,9 @@ GET /api/rooms/<roomname> -> [json] serve up page data (heartbeat api call)
  }
 GET /api/rooms -> [json] list of room names
 POST /api/rooms/<roomname> body is json vote info
+  { :vote => <vote-value> }
 POST /api/rooms/<roomname>/reset empty body; reset the votes
+POST /api/rooms/<roomname>/login?redirect_to=<url>
 
 GET /rooms/<roomname> serve up main room page; bounce to / if the username cookie is not set
 GET / view of all the rooms
