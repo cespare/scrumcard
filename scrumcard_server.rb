@@ -5,6 +5,7 @@ require "trollop"
 require "sinatra/base"
 require "json"
 require "logger"
+require "coffee-script"
 
 module ScrumCard
   VALID_VOTES = [1, 2, 3, 5, 8, 13].map(&:to_s) << "?"
@@ -120,6 +121,20 @@ module ScrumCard
 
     def json_body
       JSON.parse(request.body)
+    end
+
+    get "/assets/:filename.js" do
+      asset_path = "assets/#{params[:filename]}.js"
+      if !File.exists?(asset_path)
+        asset_path = "assets/#{params[:filename]}.coffee"
+        asset = CoffeeScript.compile(File.read(asset_path))
+      else
+        is_coffee = false
+        asset = File.read(asset_path)
+      end
+      #TODO(kle): file does not exist at all
+      content_type "application/javascript", :charset => "utf-8"
+      asset
     end
 
     # Main data call + heartbeat; gives room data in json

@@ -1,5 +1,5 @@
-_ = require './underscore'
-Backbone = require './backbone'
+#_ = require './underscore'
+#Backbone = require './backbone'
 
 class Room extends Backbone.Model
   defaults:
@@ -27,6 +27,6 @@ room = new Room(
   name: "My Room",
   people: []
 )
-console.log room.get("user")
-console.log room.get("name")
-console.log room.get("people")
+#console.log room.get("user")
+#console.log room.get("name")
+#console.log room.get("people")
