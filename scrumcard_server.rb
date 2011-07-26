@@ -6,6 +6,8 @@ require "sinatra/base"
 require "json"
 require "logger"
 require "coffee-script"
+require "erb"
+require "stylus"
 
 module ScrumCard
   VALID_VOTES = [1, 2, 3, 5, 8, 13].map(&:to_s) << "?"
@@ -129,11 +131,23 @@ module ScrumCard
         asset_path = "assets/#{params[:filename]}.coffee"
         asset = CoffeeScript.compile(File.read(asset_path))
       else
-        is_coffee = false
         asset = File.read(asset_path)
       end
       #TODO(kle): file does not exist at all
       content_type "application/javascript", :charset => "utf-8"
+      asset
+    end
+
+    get "/assets/:filename.css" do
+      asset_path = "assets/#{params[:filename]}.css"
+      if !File.exists?(asset_path)
+        asset_path = "assets/#{params[:filename]}.styl"
+        asset = Stylus.compile(File.read(asset_path))
+      else
+        asset = File.read(asset_path)
+      end
+      #TODO(kle): file does not exist at all
+      content_type "text/css", :charset => "utf-8"
       asset
     end
 
