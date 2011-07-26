@@ -11,8 +11,8 @@ require "stylus"
 
 module ScrumCard
   VALID_VOTES = [1, 2, 3, 5, 8, 13].map(&:to_s) << "?"
-  HEARTBEAT_SECONDS = 2
-  USER_TIMEOUT = HEARTBEAT_SECONDS * 2
+  HEARTBEAT_SECONDS = 20000
+  USER_TIMEOUT_SECONDS = HEARTBEAT_SECONDS * 2
   class Error < RuntimeError; end
 
   # A user is per-room
@@ -24,16 +24,16 @@ module ScrumCard
     end
 
     def expired?
-      Time.now > @last_heartbeat + USER_TIMEOUT
+      Time.now > @last_heartbeat + USER_TIMEOUT_SECONDS
     end
 
     def heartbeat
       @last_heartbeat = Time.now
     end
 
-    def vote(value)
-      raise Error, "#{vote} is not a valid value for a vote" unless VALID_VOTES.include? vote
-      @vote = vote
+    def cast_vote(value)
+      raise Error, "#{value} is not a valid value for a vote" unless VALID_VOTES.include? value
+      @vote = value
     end
 
     def voted?
@@ -71,13 +71,14 @@ module ScrumCard
     end
 
     def add_user(username)
-      raise Error, "User #{username} already exists." if @users.include? user
+      raise Error, "User #{username} already exists." if @users.include? username
       @users[username] = User.new
     end
 
     # Cast or change vote
-    def cast_vote(username, vote)
+    def cast_vote(username, value)
       raise Error, "#{username} is not present in this room" unless @users.include? username
+      @users[username].cast_vote value
     end
 
     def remove_expired_users!
@@ -102,9 +103,9 @@ module ScrumCard
       @rooms = {}
     end
 
-    def remove_expired_users!(room)
-      @logger.info "Purging expired users from #{room}..."
-      room.remove_expired_users!
+    def remove_expired_users!(room_name)
+      @logger.info "Purging expired users from #{room_name}..."
+      @rooms[room_name].remove_expired_users!
       @logger.info "Done."
     end
 
@@ -122,7 +123,7 @@ module ScrumCard
     end
 
     def json_body
-      JSON.parse(request.body)
+      JSON.parse(request.body.read)
     end
 
     get "/" do
@@ -201,7 +202,7 @@ module ScrumCard
       unless user.nil? || user.strip.empty?
         # TODO: render the login page with an error
       end
-      set_cookie "user", user
+      response.set_cookie "user", user
       redirect params[:redirect_to] || "/"
     end
 
@@ -235,11 +236,13 @@ module ScrumCard
 
     # A view of the whole state, for debugging
     get "/world" do
-      result = ""
+      result = "<h2>World State</h2>"
+      result << "#{@rooms.size} rooms.<br />"
+      result << "Your username: #{username}.<br />"
       @rooms.each do |room_name, room|
-        result << "<h4>room_name</h4>\n"
-        @room.instance_variable_get(:@users).each do |name, user|
-          result << "  #{name}: #{user.vote}"
+        result << "<h4>#{room_name}</h4>"
+        room.instance_variable_get(:@users).each do |name, user|
+          result << "&nbsp;&nbsp;#{name}: #{user.vote ? user.vote : '(no vote)'}<br />"
         end
       end
       result
