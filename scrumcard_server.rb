@@ -125,6 +125,10 @@ module ScrumCard
       JSON.parse(request.body)
     end
 
+    get "/" do
+      erb :"/index", :locals => { :rooms => @rooms }
+    end
+
     get "/assets/:filename.js" do
       asset_path = "assets/#{params[:filename]}.js"
       if !File.exists?(asset_path)

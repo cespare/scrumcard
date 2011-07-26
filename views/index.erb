@@ -14,6 +14,11 @@
   <body>
     <h1>Scrumcard Rooms</h1>
     <div id="rooms">
+      <ul>
+        <% @rooms.each do |room| %>
+          <li><a href='room/<%= room.id %>'><%= room.name %></a></li>
+        <% end %>
+      </ul>
     </div>
   </body>
 </html>
