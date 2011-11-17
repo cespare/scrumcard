@@ -1,7 +1,7 @@
 source :rubygems
 
 gem "trollop"
-gem "sinatra"
+gem "sinatra", ">= 1.3.0"
 gem "json"
 gem "thin"
 gem "coffee-script"
