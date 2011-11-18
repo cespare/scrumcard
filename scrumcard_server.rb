@@ -8,16 +8,6 @@ require "logger"
 require "coffee-script"
 require "erb"
 require "stylus"
-require "redis"
-
-# We'll live dangerously and monkey-patch in a nice helper method to the Redis API
-class Redis
-  alias :iset, :set
-  def iget(key)
-    result = get key
-    result ? result.to_i : nil
-  end
-end
 
 module ScrumCard
   VALID_VOTES = [1, 2, 3, 5, 8, 13].map(&:to_s) << "?"
@@ -25,118 +15,92 @@ module ScrumCard
   USER_TIMEOUT_SECONDS = HEARTBEAT_SECONDS * 2
   class Error < RuntimeError; end
 
-  ## A user is per-room
-  #class User
-    #def initialize(room_name)
-      #@room_
-      #reset_vote!
-      #heartbeat
-    #end
-
-    #def expired?
-      #Time.now > @last_heartbeat + USER_TIMEOUT_SECONDS
-    #end
-
-    #def heartbeat
-      #@last_heartbeat = Time.now
-    #end
-
-    #def vote
-      #@vote
-    #end
-
-    #def cast_vote(value)
-      #raise Error, "#{value} is not a valid value for a vote" unless VALID_VOTES.include? value
-      #@vote = value
-    #end
-
-    #def voted?
-      #!!@vote
-    #end
-
-    #def reset_vote!
-      #@vote = nil
-    #end
-  #end
-
-  #class Room
-    ## A room must have a user to be initialized
-    #def initialize(username, logger)
-      #@users = {}
-      #add_user username
-      #@logger = logger
-      #@expiration = Time.at(Time.now + 24 * 60 * 60) # Expire after 1 day
-    #end
-
-    #def expired?
-      #Time.now > @expiration
-    #end
-
-    ## Get a view of the users and votes where the votes are hidden unless they are all cast
-    #def votes
-      #all_voted = @users.values.all?(&:voted?)
-      #result = {}
-      #@users.each { |name, user| result[name] = all_voted ? user.vote : nil }
-      #result
-    #end
-
-    #def users
-      #@users.keys
-    #end
-
-    #def add_user(username)
-      #raise Error, "User #{username} already exists." if @users.include? username
-      #@users[username] = User.new
-    #end
-
-    ## Cast or change vote
-    #def cast_vote(username, value)
-      #raise Error, "#{username} is not present in this room" unless @users.include? username
-      #@users[username].cast_vote value
-    #end
-
-    #def remove_expired_users!
-      #@users.reject! do |name, user|
-        #@logger.info "Removing expired user #{name}." if user.expired?
-        #user.expired?
-      #end
-    #end
-
-    #def reset_votes!
-      #users.each(&:reset_vote!)
-    #end
-  #end
-
-  class Datastore
-    def initialize(options)
-      @redis = Redis.new options
+  # A user is per-room
+  class User
+    attr_reader :vote
+    def initialize
+      reset_vote!
+      heartbeat
     end
 
-    def rooms
-      @redis.smembers "rooms"
+    def expired?
+      Time.now > @last_heartbeat + USER_TIMEOUT_SECONDS
     end
 
-    def users(room_name)
-      @redis.smembers "room.#{room_name}"
+    def heartbeat
+      @last_heartbeat = Time.now
     end
 
-    def votes(room_name)
+    def cast_vote(value)
+      raise Error, "#{value} is not a valid value for a vote" unless VALID_VOTES.include? value
+      @vote = value
+    end
 
+    def voted?
+      !!@vote
+    end
+
+    def reset_vote!
+      @vote = nil
+    end
+  end
+
+  class Room
+    # A room must have a user to be initialized
+    def initialize(username, logger)
+      @users = {}
+      add_user username
+      @logger = logger
+      @expiration = Time.at(Time.now + 24 * 60 * 60) # Expire after 1 day
+    end
+
+    def expired?
+      Time.now > @expiration
+    end
+
+    # Get a view of the users and votes where the votes are hidden unless they are all cast
+    def votes
+      all_voted = @users.values.all?(&:voted?)
+      result = {}
+      @users.each { |name, user| result[name] = all_voted ? user.vote : nil }
+      result
+    end
+
+    def users
+      @users.keys
+    end
+
+    def add_user(username)
+      raise Error, "User #{username} already exists." if @users.include? username
+      @users[username] = User.new
+    end
+
+    # Cast or change vote
+    def cast_vote(username, value)
+      raise Error, "#{username} is not present in this room" unless @users.include? username
+      @users[username].cast_vote value
+    end
+
+    def remove_expired_users!
+      @users.reject! do |name, user|
+        @logger.info "Removing expired user #{name}." if user.expired?
+        user.expired?
+      end
+    end
+
+    def reset_votes!
+      users.each(&:reset_vote!)
     end
   end
 
   class Server < Sinatra::Base
     set :public, "public"
 
-    def self.set_options(options)
-      @@options = options
-    end
-
     def initialize
       super
       @logger = Logger.new STDOUT
       @logger.level = Logger::INFO
-      @datastore = Datastore.new :host => @@options[:redis_host], :port => @@options[:redis_port]
+      @rooms = {}
     end
 
     def remove_expired_users!(room_name)
@@ -290,10 +254,7 @@ if __FILE__ == $0
   options = Trollop::options do
     opt :host, "Hostname of the server", :default => "localhost"
     opt :port, "Port on which to listen", :default => 8080
-    opt :redis_host, "Hostname of the redis datastore", :default => "localhost"
-    opt :redis_port, "Port of the redis datastore", :default => 6379
   end
 
-  ScrumCard::Server.set_options options
   ScrumCard::Server.run! :host => options[:host], :port => options[:port]
 end
