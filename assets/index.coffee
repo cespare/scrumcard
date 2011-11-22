@@ -4,6 +4,6 @@ window.Index =
 
   onNewRoomSubmit: (e) ->
     e.preventDefault()
-    window.open "/rooms/#{$(e.target).find("input").val()}"
+    window.location = "/rooms/#{$(e.target).find("input").val()}"
 
 $(document).ready(-> Index.init())
