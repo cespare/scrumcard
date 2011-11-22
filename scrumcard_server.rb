@@ -12,7 +12,7 @@ require "stylus"
 module ScrumCard
   VALID_VOTES = [1, 2, 3, 5, 8, 13].map(&:to_s) << "?"
   HEARTBEAT_SECONDS = 1
-  USER_TIMEOUT_SECONDS = HEARTBEAT_SECONDS * 2
+  USER_TIMEOUT_SECONDS = HEARTBEAT_SECONDS * 3
   class Error < RuntimeError; end
 
   # A user is per-room
