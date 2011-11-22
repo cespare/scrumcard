@@ -22,10 +22,12 @@
       <div id="login">
         <% if current_user %>
           <span class="loginName"><%= current_user %></span>
+        <% end %>
+        <span id="title">ScrumCard</span>
+        <% if current_user %>
           <span class="logout"><a href="/login">logout</a></span>
         <% end %>
       </div>
-      <h2>ScrumCard</h2>
     </div>
     <div id="container">
       <%= yield %>

@@ -49,12 +49,17 @@ a
 
 #header
   background-color $lightBlue
-  padding 10px 10px 0px 10px
-  h2
-    margin-top -20px
-    text-align center
-    font 40px Garamond, "Time New Roman", serif
+  padding 5px 10px
+  text-align center
+  .loginName
+    padding-top 12px
+    float left
+  #title
+    font 36px Garamond, "Time New Roman", serif
     font-variant small-caps
+  .logout
+    padding-top 12px
+    float right
 
 #container
   background-color $offWhite
@@ -73,10 +78,6 @@ a
     input
       border 2px solid $darkGray
       outline 0
-
-#login
-  .logout
-    float right
 
 #newRoom
   form
@@ -97,7 +98,7 @@ a
       margin 5px auto
       padding 5px
       background-color $lightBlue
-      width 50%
+      width 75%
       border-radius(5px)
 
 h4
@@ -123,10 +124,9 @@ h4
 #choices
   text-align center
   margin 5px
-  button
+  select
+    font-size 16px
     padding 5px
-    font-size 18px
-    width: 40px
 
 .metaText
   margin 5px
@@ -139,7 +139,7 @@ h4
     border-collapse separate
     border-spacing 0px 5px
     margin 5px auto
-    width 50%
+    width 75%
     tr
       background-color $lightBlue
     td

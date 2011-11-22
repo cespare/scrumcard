@@ -11,9 +11,11 @@
 <div id="choicesSection" class="section">
   <h4>your vote</h4>
   <div id="choices">
-    <% choices.each do |choice| %>
-      <button><%= choice %></button>
-    <% end %>
+    <select>
+      <% choices.each do |choice| %>
+        <option><%= choice %></option>
+      <% end %>
+    </select>
   </div>
 </div>
 <div id="currentVotes" class="section">
