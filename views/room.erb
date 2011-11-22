@@ -3,19 +3,23 @@
   room - a Room.
   choices - an array of possible valid votes
 %>
-<h4>Room: <%= room_name %></h4>
-<div id="room">
-  <h4>Please vote:</h4>
+<div id="roomHeader" class="section">
+  <span id="backLink"><a href="/">home</a></span>
+  <span id="roomName"><%= room_name %></span>
+  <span id="reset"><a href="#">reset</a></span>
+</div>
+<div id="choicesSection" class="section">
+  <h4>your vote</h4>
   <div id="choices">
     <% choices.each do |choice| %>
-      <input type="button" value="<%= choice %>">
+      <button><%= choice %></button>
     <% end %>
   </div>
-  <h4>Reset the room</h4>
-  <div id="reset"><input type="button" value="reset"></div>
-  <h4>Current votes</h4>
+</div>
+<div id="currentVotes" class="section">
+  <h4>current votes</h4>
   <div id="votes">
-    <span id="loading">Loading&hellip;</span>
+    <span class="metaText">loading&hellip;</span>
   </div>
 </div>
 <script type="text/javascript">

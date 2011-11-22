@@ -6,8 +6,8 @@ class window.Room
     @last_update = 0
     @maybeRefreshResults()
     Util.setInterval @HEARTBEAT_SECONDS * 1000, => @maybeRefreshResults()
-    $("#choices input").on "click", (e) => @onVote(e)
-    $("#reset input").on "click", (e) => @onReset(e)
+    $("#choices button").on "click", (e) => @onVote(e)
+    $("#reset a").on "click", (e) => @onReset(e)
 
   # Only refresh if there have been updates.
   maybeRefreshResults: ->
@@ -16,8 +16,8 @@ class window.Room
       url: "/api/rooms/#{@name}?last_update=#{@last_update}"
       statusCode:
         200: (result) =>
-          @last_update = result.last_update
-          @refreshResults result.current_user, result.votes
+          $("#votes").html result
+          @last_update = Number($("#votes table").attr("data-last-update"))
         409: (result) =>
           alert result.responseText
           window.location = "/"
@@ -27,20 +27,16 @@ class window.Room
           return
         # 400: => # This happens when the room is cleaned up. Take care of this later.
 
-  refreshResults: (current_user, votes) ->
-    newVoteList = $("<ul></ul>")
-    newVoteList.append("<li>#{user}: #{vote}</li>") for user, vote of votes
-    $("#votes").html newVoteList
-
   onVote: (event) ->
     $.ajax
       type: "post"
       url: "/api/rooms/#{@name}"
-      data: $.toJSON { vote: event.target.value }
+      data: $.toJSON { vote: event.target.textContent }
       contentType: "application/json"
       success: => @maybeRefreshResults()
 
   onReset: (event) ->
+    event.preventDefault()
     $.ajax
       type: "post"
       url: "/api/rooms/#{@name}/reset"

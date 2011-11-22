@@ -1,6 +1,6 @@
 window.Index =
   init: ->
-    $("#newRoom").on "submit", (e) => @onNewRoomSubmit(e)
+    $("#newRoom form").on "submit", (e) => @onNewRoomSubmit(e)
 
   onNewRoomSubmit: (e) ->
     e.preventDefault()

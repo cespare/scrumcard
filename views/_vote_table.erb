@@ -1,0 +1,17 @@
+<%# Vote table partial. Expects:
+  last_update - the time (milliseconds) of the previous update
+  votes - hash of username -> vote
+  current_user
+  voting_complete - whether the voting is finished
+%>
+<table data-last-update="<%= last_update %>">
+  <% votes.each do |user, vote| %>
+    <% classes = [] %>
+    <% classes << "notVoted" if vote.empty? %>
+    <% classes << "currentUser" if user == current_user %>
+    <% classes << "hidden" unless voting_complete || user == current_user %>
+    <tr class="<%= classes.join(" ") %>">
+      <td class="user"><%= user %></td><td class="vote"><%= vote %></td>
+    </tr>
+  <% end %>
+</table>

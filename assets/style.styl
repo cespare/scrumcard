@@ -1,2 +1,165 @@
+$darkGray = #888
+$textColor = #444
+$offWhite = #fcfcfc
+$lightBlue = #ccccfe
+$lightRed = #fecccc
+$lightGreen = #ccfecc
+
+border-radius(n)
+  -webkit-border-radius n
+  -moz-border-radius n
+  border-radius n
+
+border-top-right-radius(n)
+  -webkit-border-top-right-radius n
+  -moz-border-radius-topright n
+  border-top-right-radius n
+
+border-bottom-right-radius(n)
+  -webkit-border-bottom-right-radius n
+  -moz-border-radius-bottomright n
+  border-bottom-right-radius n
+
+border-bottom-left-radius(n)
+  -webkit-border-bottom-left-radius n
+  -moz-border-radius-bottomleft n
+  border-bottom-left-radius n
+
+border-top-left-radius(n)
+  -webkit-border-top-left-radius n
+  -moz-border-radius-topleft n
+  border-top-left-radius n
+
+*
+  margin 0
+  padding 0
+
 body
-  background-color #eee
+  background-color $darkGray
+  font 16px Helvetica, Arial, sans-serif
+  color $textColor
+  -webkit-font-smoothing antialiased
+  width 100%
+  height 100%
+
+a
+  color $textColor
+  &:visited
+    color $textColor
+
+#header
+  background-color $lightBlue
+  padding 10px
+  h2
+    text-align center
+    font 40px Garamond, "Time New Roman", serif
+    font-variant small-caps
+
+#container
+  background-color $offWhite
+  div.section
+    padding 10px
+    border-bottom 5px solid $darkGray
+
+#loginBox
+  padding 10px
+  text-align center
+  form
+    margin-top 10px
+    input, button
+      font-size 16px
+      padding 5px
+    input
+      border 2px solid $darkGray
+      outline 0
+
+#login
+  .logout
+    float right
+
+#newRoom
+  form
+    margin-top 10px
+    input, button
+      font-size 16px
+      padding 5px
+    input
+      border 2px solid $darkGray
+      outline 0
+
+#roomList
+  ul
+    text-align center
+    margin-top 5px
+    list-style-type none
+    li
+      margin 5px auto
+      padding 5px
+      background-color $lightBlue
+      width 50%
+      border-radius(5px)
+
+h4
+  font-size 22px
+  font-weight bold
+  text-align center
+
+#roomHeader
+  text-align center
+
+#backLink
+  padding-top 8px
+  float left
+
+#roomName
+  font 28px Garamond, "Time New Roman", serif
+  font-variant small-caps
+
+#reset
+  padding-top 8px
+  float right
+
+#choices
+  text-align center
+  margin 10px
+  button
+    padding 8px
+    font-size 20px
+    width: 50px
+
+.metaText
+  margin 5px
+  text-align center
+  font-style italic
+
+#currentVotes
+  text-align center
+  table
+    border-collapse separate
+    border-spacing 0px 5px
+    margin 10px auto
+    width 50%
+    tr
+      background-color $lightBlue
+    td
+      padding 5px
+    td.user
+      text-align left
+      border-top-left-radius(5px)
+      border-bottom-left-radius(5px)
+    td.vote
+      width 30px
+      text-align center
+      border-top-right-radius(5px)
+      border-bottom-right-radius(5px)
+    tr.hidden
+      background-color $lightGreen
+      td.vote
+        font-style italic
+    tr.notVoted
+      background-color $lightRed
+    tr.currentUser
+      font-weight bold
+
+
+

@@ -63,7 +63,7 @@ module ScrumCard
         if all_voted?
           result[name] = user.vote
         else
-          result[name] = (name == current_user) ? (user.vote || "") : (user.vote ? "[hidden]" : "")
+          result[name] = (name == current_user) ? (user.vote || "") : (user.vote ? "hidden" : "")
         end
       end
       result
@@ -175,10 +175,10 @@ module ScrumCard
       end
       room.heartbeat current_user
       return 304 if params[:last_update].to_i >= room.last_update.to_i
-      content_type :json
-      {
-        :user => current_user, :votes => room.votes(current_user), :last_update => room.last_update.to_i
-      }.to_json
+      erb :_vote_table, :layout => false, :locals => {
+          :last_update => room.last_update.to_i, :votes => room.votes(current_user),
+          :current_user => current_user, :voting_complete => room.all_voted?
+      }
     end
 
     # Get a json list of room names
@@ -215,8 +215,9 @@ module ScrumCard
     post "/login" do
       # Right now we're not tracking users server-side at all
       user = params["user"]
-      unless user.nil? || user.strip.empty?
+      if user.nil? || user.strip.empty?
         # TODO: render the login page with an error
+        redirect "/login"
       end
       response.set_cookie "user", user
       response.set_cookie "guid", generateGuid

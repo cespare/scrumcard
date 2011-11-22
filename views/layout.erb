@@ -16,10 +16,15 @@
     </script>
   </head>
   <body>
-    <h4>scrumcard</h4>
-    <% if current_user %>
-      <div>logged in as <%= current_user %> (<a href="/login">change?</a>)</div>
-    <% end %>
+    <div id="header">
+      <div id="login">
+        <% if current_user %>
+          <span class="loginName"><%= current_user %></span>
+          <span class="logout"><a href="/login">logout</a></span>
+        <% end %>
+      </div>
+      <h2>scrumcard</h2>
+    </div>
     <div id="container">
       <%= yield %>
     </div>

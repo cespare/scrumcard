@@ -1,10 +1,20 @@
 <%# Expects 'rooms', an array of Rooms. %>
-<h4>Rooms</h4>
-<ul>
-  <% rooms.each do |room_name, room| %>
-    <li><a href="/rooms/<%= room_name %>"><%= room_name %></a></li>
+<div id="roomList" class="section">
+  <h4>rooms</h4>
+  <% if rooms.empty? %>
+    <div class="metaText">no rooms have been created</div>
+  <% else %>
+    <ul>
+      <% rooms.each do |room_name, room| %>
+        <li><a href="/rooms/<%= room_name %>"><%= room_name %></a></li>
+      <% end %>
+    </ul>
   <% end %>
-</ul>
-<form id="newRoom">
-  <span>Create new room:</span><input></input>
-</form>
+</div>
+<div id="newRoom" class="section">
+  <h4>create new room
+  <form>
+    <input />
+    <button>create</button>
+  </form>
+</div>
