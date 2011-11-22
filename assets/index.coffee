@@ -1,7 +1,6 @@
 window.Index =
   init: ->
-    # TODO(caleb) remove deprecated live() calls
-    $("#newRoom").live "submit", (e) => @onNewRoomSubmit(e)
+    $("#newRoom").on "submit", (e) => @onNewRoomSubmit(e)
 
   onNewRoomSubmit: (e) ->
     e.preventDefault()
