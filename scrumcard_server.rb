@@ -11,14 +11,16 @@ require "stylus"
 
 module ScrumCard
   VALID_VOTES = [1, 2, 3, 5, 8, 13].map(&:to_s) << "?"
-  HEARTBEAT_SECONDS = 20000
+  HEARTBEAT_SECONDS = 1
   USER_TIMEOUT_SECONDS = HEARTBEAT_SECONDS * 2
   class Error < RuntimeError; end
 
   # A user is per-room
   class User
-    attr_reader :vote
-    def initialize
+    attr_reader :vote, :guid
+
+    def initialize(guid)
+      @guid = guid
       reset_vote!
       heartbeat
     end
@@ -46,12 +48,21 @@ module ScrumCard
   end
 
   class Room
+    attr_accessor :all_voted, :last_update
+    attr_reader :users
+
     # A room must have a user to be initialized
-    def initialize(username, logger)
+    def initialize(username, guid, logger)
+      @all_voted = false
       @users = {}
-      add_user username
+      add_user username, guid
       @logger = logger
       @expiration = Time.at(Time.now + 24 * 60 * 60) # Expire after 1 day
+      @last_update = Time.now
+    end
+
+    def heartbeat username
+      @users[username].heartbeat
     end
 
     def expired?
@@ -60,41 +71,46 @@ module ScrumCard
 
     # Get a view of the users and votes where the votes are hidden unless they are all cast
     def votes
-      all_voted = @users.values.all?(&:voted?)
       result = {}
-      @users.each { |name, user| result[name] = all_voted ? user.vote : nil }
+      @users.each { |name, user| result[name] = @all_voted ? user.vote : (user.vote ? "<hidden>" : "") }
       result
     end
 
-    def users
-      @users.keys
-    end
-
-    def add_user(username)
+    def add_user(username, guid)
       raise Error, "User #{username} already exists." if @users.include? username
-      @users[username] = User.new
+      @users[username] = User.new guid
+      @last_update = Time.now
     end
 
     # Cast or change vote
     def cast_vote(username, value)
       raise Error, "#{username} is not present in this room" unless @users.include? username
       @users[username].cast_vote value
+      @all_voted = true if @users.values.all(&:voted?)
+      @last_update = Time.now
     end
 
     def remove_expired_users!
       @users.reject! do |name, user|
-        @logger.info "Removing expired user #{name}." if user.expired?
+        if user.expired?
+          @last_update = Time.now
+          @logger.info "Removing expired user #{name}."
+        end
         user.expired?
       end
     end
 
     def reset_votes!
       users.each(&:reset_vote!)
+      @last_update = Time.now
     end
   end
 
   class Server < Sinatra::Base
-    set :public, "public"
+    set :public_folder, "public"
+    attr_accessor :current_user, :current_user_guid
+
+    LOGIN_WHITELIST = [%r[^assets/], %r[^login], /favicon/]
 
     def initialize
       super
@@ -104,41 +120,41 @@ module ScrumCard
     end
 
     def remove_expired_users!(room_name)
-      @logger.info "Purging expired users from #{room_name}..."
       @rooms[room_name].remove_expired_users!
-      @logger.info "Done."
     end
 
     # Garbage collect rooms that have persisted for a long time
     def remove_expired_rooms!
-      @logger.info "Removing expired rooms..."
       @rooms.reject! do |name, room|
         @logger.info "Removing expired room #{name}." if room.expired?
         room.expired?
       end
     end
 
-    def username
-      request.cookies["user"]
-    end
-
     def json_body
       JSON.parse(request.body.read)
     end
 
-    get "/" do
-      erb :"/index", :locals => { :rooms => @rooms }
+    before do
+      next if LOGIN_WHITELIST.any? { |route| request.path[1..-1] =~ route }
+      self.current_user = request.cookies["user"]
+      self.current_user_guid = request.cookies["guid"]
+      unless self.current_user
+        response.set_cookie "redirect_to", :value => request.url, :path => "/"
+        @logger.info "Redirecting to /login"
+        redirect "/login"
+      end
     end
 
-    get "/assets/:filename.js" do
-      asset_path = "assets/#{params[:filename]}.js"
-      if !File.exists?(asset_path)
+    get "/js/:filename.js" do
+      asset_path = "public/#{params[:filename]}.js"
+      if File.exists? asset_path
+        asset = File.read(asset_path)
+      else
         asset_path = "assets/#{params[:filename]}.coffee"
         asset = CoffeeScript.compile(File.read(asset_path))
-      else
-        asset = File.read(asset_path)
       end
-      #TODO(kle): file does not exist at all
+      # TODO(kle): file does not exist at all
       content_type "application/javascript", :charset => "utf-8"
       asset
     end
@@ -157,21 +173,25 @@ module ScrumCard
     end
 
     # Main data call + heartbeat; gives room data in json
-    # Yes, we're creating rooms on a GET. We know it's janky. So sue us.
     get "/api/rooms/:name" do |room_name|
-      halt 401, "No user specified" unless username
-      content_type :json
+      halt 401, "No user specified" unless current_user
       room = @rooms[room_name]
-      unless room
-        room = Room.new username, @logger
-        @rooms[room_name] = room
-      end
+      halt 400, "No room #{room_name}" unless room
       # Cleanup
       remove_expired_users! room_name
       remove_expired_rooms!
 
-      room.add_user(username) unless room.users.include? username
-      { :user => username, :room => room_name, :votes => room.votes }.to_json
+      if room.users.include? current_user
+        if room.users[current_user].guid != current_user_guid
+          halt 409, "There is already a user #{current_user} in the room #{room_name}."
+        end
+      else
+        room.add_user(current_user, current_user_guid)
+      end
+      room.heartbeat current_user
+      return 304 if params[:last_update].to_i >= room.last_update.to_i
+      content_type :json
+      { :user => current_user, :votes => room.votes, :last_update => room.last_update.to_i }.to_json
     end
 
     # Get a json list of room names
@@ -195,14 +215,23 @@ module ScrumCard
       "OK"
     end
 
+    # Generate a random ID (not a true guid, but fine for us). See
+    # http://stackoverflow.com/questions/105034/how-to-create-a-guid-uuid-in-javascript
+    def generateGuid
+      def s4() ((1 + rand)  * 0x10000).round.to_s(16)[1..-1] end
+      "#{s4()}#{s4()}#{s4()}#{s4()}"
+    end
+
     # Set a username
     post "/login" do
+      @logger.info "post login"
       # Right now we're not tracking users server-side at all
-      user = json_body["user"]
+      user = params["user"]
       unless user.nil? || user.strip.empty?
         # TODO: render the login page with an error
       end
       response.set_cookie "user", user
+      response.set_cookie "guid", generateGuid
       redirect params[:redirect_to] || "/"
     end
 
@@ -216,29 +245,30 @@ module ScrumCard
 
     # Serve the login page
     get "/login" do
-      # TODO: Render the login page.
+      @logger.info "/login"
+      erb :login
     end
 
     # Serve the view of a room
     get "/rooms/:name" do |room_name|
       room = @rooms[room_name]
-      if room
-        # TODO: render room
-      else
-        # TODO: render error? Or redirect
+      unless room
+        room = Room.new current_user, current_user_guid, @logger
+        @rooms[room_name] = room
       end
+      erb :room, :locals => { :room_name => room_name, :room => room }
     end
 
     # Serve a view of all the rooms
     get "/" do
-      # TODO: render main page
+      erb :index, :locals => { :rooms => @rooms }
     end
 
     # A view of the whole state, for debugging
     get "/world" do
       result = "<h2>World State</h2>"
       result << "#{@rooms.size} rooms.<br />"
-      result << "Your username: #{username}.<br />"
+      result << "Your username: #{current_user}.<br />"
       @rooms.each do |room_name, room|
         result << "<h4>#{room_name}</h4>"
         room.instance_variable_get(:@users).each do |name, user|

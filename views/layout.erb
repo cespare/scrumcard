@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Scrumcard</title>
+    <!-- <link type="text/css" href="/assets/scrumcard.css" rel="stylesheet" /> -->
+    <script src="/js/jquery-1.7.min.js"></script>
+    <script src="/js/underscore.js"></script>
+    <script src="/js/backbone.js"></script>
+    <script src="/js/index.js"></script>
+    <script src="/js/room.js"></script>
+    <script src="/js/util.js"></script>
+    <script type="text/javascript">
+      $(document).ready(function () {
+      });
+    </script>
+  </head>
+  <body>
+    <h4>scrumcard</h4>
+    <% if current_user %>
+      <div>logged in as <%= current_user %> (<a href="/login">change?</a>)</div>
+    <% end %>
+    <div id="container">
+      <%= yield %>
+    </div>
+  </body>
+</html>

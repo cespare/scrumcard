@@ -1,0 +1,11 @@
+<%# Expects:
+  room_name
+  room - a Room.
+%>
+<h4>Room: <%= room_name %></h4>
+<div id="room">
+  <span id="loading">Loading&hellip;</span>
+</div>
+<script type="text/javascript">
+  Room.instance = new Room(<%= %["#{room_name}"] %>);
+</script>

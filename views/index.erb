@@ -1,24 +1,10 @@
-<html>
-  <head>
-    <title>Scrumcard</title>
-    <link type="text/css" href="/assets/scrumcard.css" rel="stylesheet" />
-    <script src="/assets/jquery-1.6.2.js"></script>
-    <script src="/assets/underscore.js"></script>
-    <script src="/assets/backbone.js"></script>
-    <script src="/assets/scrumcard.js"></script>
-    <script type="text/javascript">
-      $(document).ready(function () {
-      });
-    </script>
-  </head>
-  <body>
-    <h1>Scrumcard Rooms</h1>
-    <div id="rooms">
-      <ul>
-        <% @rooms.each do |room| %>
-          <li><a href='room/<%= room.id %>'><%= room.name %></a></li>
-        <% end %>
-      </ul>
-    </div>
-  </body>
-</html>
+<%# Expects 'rooms', an array of Rooms. %>
+<h4>Rooms</h4>
+<ul>
+  <% rooms.each do |room_name, room| %>
+    <li><a href="/rooms/<%= room_name %>"><%= room_name %></a></li>
+  <% end %>
+</ul>
+<form id="newRoom">
+  <span>Create new room:</span><input></input>
+</form>
