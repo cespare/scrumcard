@@ -105,7 +105,7 @@ module ScrumCard
     set :public_folder, "public"
     attr_accessor :current_user, :current_user_guid
 
-    LOGIN_WHITELIST = [%r[^assets/], %r[^login], /favicon/]
+    LOGIN_WHITELIST = [%r[^js/], %r[^css/], %r[^login], /favicon/]
 
     def initialize
       super
@@ -137,30 +137,24 @@ module ScrumCard
       end
     end
 
-    get "/js/:filename.js" do
-      asset_path = "public/#{params[:filename]}.js"
-      if File.exists? asset_path
-        asset = File.read(asset_path)
-      else
-        asset_path = "assets/#{params[:filename]}.coffee"
-        asset = CoffeeScript.compile(File.read(asset_path))
-      end
-      # TODO(kle): file does not exist at all
+    get "/js/:filename.js" do |filename|
+      asset_path = "public/#{filename}.js"
       content_type "application/javascript", :charset => "utf-8"
-      asset
+      if File.exists? asset_path
+        File.read(asset_path)
+      else
+        CoffeeScript.compile(File.read("assets/#{filename}.coffee"))
+      end
     end
 
-    get "/assets/:filename.css" do
-      asset_path = "assets/#{params[:filename]}.css"
-      if !File.exists?(asset_path)
-        asset_path = "assets/#{params[:filename]}.styl"
-        asset = Stylus.compile(File.read(asset_path))
-      else
-        asset = File.read(asset_path)
-      end
-      #TODO(kle): file does not exist at all
+    get "/css/:filename.css" do |filename|
+      asset_path = "public/#{filename}.js"
       content_type "text/css", :charset => "utf-8"
-      asset
+      if File.exists? asset_path
+        File.read(asset_path)
+      else
+        Stylus.compile(File.read("assets/#{filename}.styl"))
+      end
     end
 
     # Main data call + heartbeat; gives room data in json
