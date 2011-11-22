@@ -25,22 +25,16 @@ module ScrumCard
       heartbeat
     end
 
-    def expired?
-      Time.now > @last_heartbeat + USER_TIMEOUT_SECONDS
-    end
+    def expired?() Time.now > @last_heartbeat + USER_TIMEOUT_SECONDS end
 
-    def heartbeat
-      @last_heartbeat = Time.now
-    end
+    def heartbeat() @last_heartbeat = Time.now end
 
     def cast_vote(value)
       raise Error, "#{value} is not a valid value for a vote" unless VALID_VOTES.include? value
       @vote = value
     end
 
-    def voted?
-      !!@vote
-    end
+    def voted?() !!@vote end
 
     def reset_vote!
       @vote = nil
@@ -60,13 +54,9 @@ module ScrumCard
       @last_update = Time.now
     end
 
-    def heartbeat username
-      @users[username].heartbeat
-    end
+    def heartbeat(username) @users[username].heartbeat end
 
-    def expired?
-      Time.now > @expiration
-    end
+    def expired?() Time.now > @expiration end
 
     # Get a view of the users and votes where the votes are hidden unless they are all cast
     def votes(current_user)
@@ -87,9 +77,7 @@ module ScrumCard
       @last_update = Time.now
     end
 
-    def all_voted?
-      @users.values.all?(&:voted?)
-    end
+    def all_voted?() @users.values.all?(&:voted?) end
 
     # Cast or change vote
     def cast_vote(username, value)
@@ -128,9 +116,7 @@ module ScrumCard
       @rooms = {}
     end
 
-    def remove_expired_users!(room_name)
-      @rooms[room_name].remove_expired_users!
-    end
+    def remove_expired_users!(room_name) @rooms[room_name].remove_expired_users! end
 
     # Garbage collect rooms that have persisted for a long time
     def remove_expired_rooms!
@@ -140,9 +126,7 @@ module ScrumCard
       end
     end
 
-    def json_body
-      JSON.parse(request.body.read)
-    end
+    def json_body() JSON.parse(request.body.read) end
 
     before do
       next if LOGIN_WHITELIST.any? { |route| request.path[1..-1] =~ route }
@@ -273,9 +257,7 @@ module ScrumCard
     end
 
     # Serve a view of all the rooms
-    get "/" do
-      erb :index, :locals => { :rooms => @rooms }
-    end
+    get("/") { erb :index, :locals => { :rooms => @rooms } }
 
     # A view of the whole state, for debugging
     get "/world" do
