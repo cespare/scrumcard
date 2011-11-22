@@ -18,8 +18,10 @@ GEM
       rack (~> 1.3)
       rack-protection (~> 1.1)
       tilt (~> 1.3)
-    stylus (0.2.0)
+    stylus (0.3.0)
       execjs
+      stylus-source
+    stylus-source (0.19.3)
     thin (1.2.11)
       daemons (>= 1.0.9)
       eventmachine (>= 0.12.6)
@@ -34,6 +36,6 @@ DEPENDENCIES
   coffee-script
   json
   sinatra (>= 1.3.0)
-  stylus
+  stylus (>= 0.3.0)
   thin
   trollop
