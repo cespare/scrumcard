@@ -25,6 +25,7 @@ class window.Room
           # Note(caleb): I'll just explicitly put this case here for completeness. This happens when the last
           # server update time is no more recent than our own recorded last update time.
           return
+        # 400: => # This happens when the room is cleaned up. Take care of this later.
 
   refreshResults: (current_user, votes) ->
     newVoteList = $("<ul></ul>")
