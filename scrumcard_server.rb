@@ -36,9 +36,7 @@ module ScrumCard
 
     def voted?() !!@vote end
 
-    def reset_vote!
-      @vote = nil
-    end
+    def reset_vote!() @vote = nil end
   end
 
   class Room
@@ -221,7 +219,6 @@ module ScrumCard
 
     # Set a username
     post "/login" do
-      @logger.info "post login"
       # Right now we're not tracking users server-side at all
       user = params["user"]
       unless user.nil? || user.strip.empty?
@@ -258,20 +255,6 @@ module ScrumCard
 
     # Serve a view of all the rooms
     get("/") { erb :index, :locals => { :rooms => @rooms } }
-
-    # A view of the whole state, for debugging
-    get "/world" do
-      result = "<h2>World State</h2>"
-      result << "#{@rooms.size} rooms.<br />"
-      result << "Your username: #{current_user}.<br />"
-      @rooms.each do |room_name, room|
-        result << "<h4>#{room_name}</h4>"
-        room.instance_variable_get(:@users).each do |name, user|
-          result << "&nbsp;&nbsp;#{name}: #{user.vote ? user.vote : '(no vote)'}<br />"
-        end
-      end
-      result
-    end
   end
 end
 
