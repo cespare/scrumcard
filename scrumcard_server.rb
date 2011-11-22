@@ -48,12 +48,11 @@ module ScrumCard
   end
 
   class Room
-    attr_accessor :all_voted, :last_update
+    attr_accessor :last_update
     attr_reader :users
 
     # A room must have a user to be initialized
     def initialize(username, guid, logger)
-      @all_voted = false
       @users = {}
       add_user username, guid
       @logger = logger
@@ -70,9 +69,15 @@ module ScrumCard
     end
 
     # Get a view of the users and votes where the votes are hidden unless they are all cast
-    def votes
+    def votes(current_user)
       result = {}
-      @users.each { |name, user| result[name] = @all_voted ? user.vote : (user.vote ? "<hidden>" : "") }
+      @users.each do |name, user|
+        if all_voted?
+          result[name] = user.vote
+        else
+          result[name] = (name == current_user) ? (user.vote || "") : (user.vote ? "[hidden]" : "")
+        end
+      end
       result
     end
 
@@ -82,11 +87,15 @@ module ScrumCard
       @last_update = Time.now
     end
 
+    def all_voted?
+      @users.values.all?(&:voted?)
+    end
+
     # Cast or change vote
     def cast_vote(username, value)
+      raise Error, "Voting has ended." if all_voted?
       raise Error, "#{username} is not present in this room" unless @users.include? username
       @users[username].cast_vote value
-      @all_voted = true if @users.values.all(&:voted?)
       @last_update = Time.now
     end
 
@@ -101,7 +110,7 @@ module ScrumCard
     end
 
     def reset_votes!
-      users.each(&:reset_vote!)
+      @users.values.each(&:reset_vote!)
       @last_update = Time.now
     end
   end
@@ -191,7 +200,9 @@ module ScrumCard
       room.heartbeat current_user
       return 304 if params[:last_update].to_i >= room.last_update.to_i
       content_type :json
-      { :user => current_user, :votes => room.votes, :last_update => room.last_update.to_i }.to_json
+      {
+        :user => current_user, :votes => room.votes(current_user), :last_update => room.last_update.to_i
+      }.to_json
     end
 
     # Get a json list of room names
@@ -202,13 +213,15 @@ module ScrumCard
 
     # Cast a vote; the body of the POST is json-ified vote (e.g. 1 or "?")
     post "/api/rooms/:name" do |room_name|
-      halt 401, "No user specified" unless username
+      halt 401, "No user specified" unless current_user
       room = @rooms[room_name]
       halt 404, "Bad room #{room_name}" unless room
-      halt 404, "User #{username} is not in the room #{room_name}." unless room.users.include? username
+      unless room.users.include? current_user
+        halt 404, "User #{current_user} is not in the room #{room_name}."
+      end
       vote = json_body["vote"]
       begin
-        room.cast_vote username, vote
+        room.cast_vote current_user, vote
       rescue Error => e
         halt 400, e.message
       end
@@ -256,7 +269,7 @@ module ScrumCard
         room = Room.new current_user, current_user_guid, @logger
         @rooms[room_name] = room
       end
-      erb :room, :locals => { :room_name => room_name, :room => room }
+      erb :room, :locals => { :room_name => room_name, :room => room, :choices => VALID_VOTES }
     end
 
     # Serve a view of all the rooms

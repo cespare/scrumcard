@@ -1,10 +1,22 @@
 <%# Expects:
   room_name
   room - a Room.
+  choices - an array of possible valid votes
 %>
 <h4>Room: <%= room_name %></h4>
 <div id="room">
-  <span id="loading">Loading&hellip;</span>
+  <h4>Please vote:</h4>
+  <div id="choices">
+    <% choices.each do |choice| %>
+      <input type="button" value="<%= choice %>">
+    <% end %>
+  </div>
+  <h4>Reset the room</h4>
+  <div id="reset"><input type="button" value="reset"></div>
+  <h4>Current votes</h4>
+  <div id="votes">
+    <span id="loading">Loading&hellip;</span>
+  </div>
 </div>
 <script type="text/javascript">
   Room.instance = new Room(<%= %["#{room_name}"] %>);
