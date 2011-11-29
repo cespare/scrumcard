@@ -18,18 +18,18 @@
     </script>
   </head>
   <body>
-    <div id="header">
-      <div id="login">
-        <% if current_user %>
-          <span class="loginName"><%= current_user %></span>
-        <% end %>
-        <span id="title">ScrumCard</span>
-        <% if current_user %>
-          <span class="logout"><a href="/login">logout</a></span>
-        <% end %>
-      </div>
-    </div>
     <div id="container">
+      <div id="header">
+        <div id="login">
+          <% if current_user %>
+            <span class="loginName"><%= current_user %></span>
+          <% end %>
+          <span id="title">ScrumCard</span>
+          <% if current_user %>
+            <span class="logout"><a href="/login">logout</a></span>
+          <% end %>
+        </div>
+      </div>
       <%= yield %>
     </div>
   </body>

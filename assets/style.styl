@@ -12,6 +12,7 @@ $lightGreen = #ccfecc
   padding 0
 
 body
+  text-align center
   background-color $darkGray
   font 16px Helvetica, Arial, sans-serif
   color $textColor
@@ -23,10 +24,14 @@ a
   color $textColor
   &:visited { color: $textColor }
 
+#container
+  max-width 500px
+  margin 0 auto
+  min-height 600px
+
 #header
   background-color $lightBlue
   padding 5px 10px
-  text-align center
   .loginName
     padding-top 12px
     float left
@@ -42,10 +47,10 @@ a
   div.section
     padding 5px 10px
     border-bottom 5px solid $darkGray
+    &#currentVotes { border-bottom-width: 0px }
 
 #loginBox
   padding 10px
-  text-align center
   form
     margin-top 10px
     input, button
