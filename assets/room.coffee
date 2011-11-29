@@ -22,7 +22,7 @@ class window.Room
           alert result.responseText
           window.location = "/"
         304: =>
-          # Note(caleb): I'll just explicitly put this case here for completeness. This happens when the last
+          # NOTE(caleb): I'll just explicitly put this case here for completeness. This happens when the last
           # server update time is no more recent than our own recorded last update time.
           return
         # 400: => # This happens when the room is cleaned up. Take care of this later.
