@@ -109,6 +109,7 @@ module ScrumCard
 
     def initialize
       super
+      Stylus.use :nib
       @logger = Logger.new STDOUT
       @logger.level = Logger::INFO
       @rooms = {}

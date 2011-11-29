@@ -1,34 +1,11 @@
+@import "nib"
+
 $darkGray = #888
 $textColor = #444
 $offWhite = #fcfcfc
 $lightBlue = #ccccfe
 $lightRed = #fecccc
 $lightGreen = #ccfecc
-
-border-radius(n)
-  -webkit-border-radius n
-  -moz-border-radius n
-  border-radius n
-
-border-top-right-radius(n)
-  -webkit-border-top-right-radius n
-  -moz-border-radius-topright n
-  border-top-right-radius n
-
-border-bottom-right-radius(n)
-  -webkit-border-bottom-right-radius n
-  -moz-border-radius-bottomright n
-  border-bottom-right-radius n
-
-border-bottom-left-radius(n)
-  -webkit-border-bottom-left-radius n
-  -moz-border-radius-bottomleft n
-  border-bottom-left-radius n
-
-border-top-left-radius(n)
-  -webkit-border-top-left-radius n
-  -moz-border-radius-topleft n
-  border-top-left-radius n
 
 *
   margin 0
@@ -146,13 +123,11 @@ h4
       padding 5px
     td.user
       text-align left
-      border-top-left-radius(5px)
-      border-bottom-left-radius(5px)
+      border-radius: left 5px
     td.vote
       width 30px
       text-align center
-      border-top-right-radius(5px)
-      border-bottom-right-radius(5px)
+      border-radius: right 5px
     tr.hidden
       background-color $lightGreen
       td.vote
