@@ -6,7 +6,7 @@ class window.Room
     [@last_update, @last_vote] = [0, 1]
     @maybeRefreshResults()
     Util.setInterval @HEARTBEAT_SECONDS * 1000, => @maybeRefreshResults()
-    $("#choices select").on "change", (e) => @onVote(e)
+    $("#choices button").on "click", (e) => @onVote(e)
     $("#reset a").on "click", (e) => @onReset(e)
 
   # Only refresh if there have been updates.
@@ -46,10 +46,11 @@ class window.Room
           return
 
   onVote: (event) ->
+    window.e = event
     $.ajax
       type: "post"
       url: "/api/rooms/#{@name}"
-      data: $.toJSON { vote: event.target.value }
+      data: $.toJSON { vote: event.target.innerText }
       contentType: "application/json"
       success: => @maybeRefreshResults()
 

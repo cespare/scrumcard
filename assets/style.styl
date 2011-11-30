@@ -37,6 +37,7 @@ a
   #title
     font 36px Garamond, "Time New Roman", serif
     font-variant small-caps
+    text-shadow -1px -1px 0px lighten($lightBlue, 20%)
   .logout
     padding-top 12px
     float right
@@ -103,9 +104,19 @@ h4
 #choices
   text-align center
   margin 5px
-  select
+  button
     font-size 16px
-    padding 5px
+    height 30px
+    width 30px
+    border-radius 5px
+    border 1px solid lighten($darkGray, 20%)
+    box-shadow 0px 1px 1px lighten($darkGray, 50%)
+    background linear-gradient(top, lighten($lightBlue, 50%), $lightBlue)
+    text-shadow -1px -1px 0px lighten($lightBlue, 30%)
+    &:active
+      background linear-gradient(top, $lightBlue, lighten($lightBlue, 50%))
+      box-shadow none
+
 
 .metaText
   margin 5px
