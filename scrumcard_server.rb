@@ -57,13 +57,14 @@ module ScrumCard
     def expired?() Time.now > @expiration end
 
     # Get a view of the users and votes where the votes are hidden unless they are all cast
+    # We also pass back the index in the VALID_VOTES array (this is used to create a color for the vote).
     def votes(current_user)
       result = {}
       @users.each do |name, user|
-        if all_voted?
-          result[name] = user.vote
+        if all_voted? || name == current_user
+          result[name] = [VALID_VOTES.index(user.vote) || 0, user.vote || ""]
         else
-          result[name] = (name == current_user) ? (user.vote || "") : (user.vote ? "hidden" : "")
+          result[name] = [-1, user.vote ? "hidden" : ""]
         end
       end
       result
@@ -178,7 +179,7 @@ module ScrumCard
       return 304 if params[:last_update].to_i >= room.last_update.to_i
       erb :_vote_table, :layout => false, :locals => {
           :last_update => room.last_update.to_i, :votes => room.votes(current_user),
-          :current_user => current_user, :voting_complete => room.all_voted?
+          :vote_choices => VALID_VOTES, :current_user => current_user, :voting_complete => room.all_voted?
       }
     end
 
@@ -209,7 +210,7 @@ module ScrumCard
     # http://stackoverflow.com/questions/105034/how-to-create-a-guid-uuid-in-javascript
     def generateGuid
       def s4() ((1 + rand)  * 0x10000).round.to_s(16)[1..-1] end
-      "#{s4()}#{s4()}#{s4()}#{s4()}"
+      "#{s4}#{s4}#{s4}#{s4}"
     end
 
     # Set a username

@@ -17,6 +17,13 @@ class window.Room
       statusCode:
         200: (result) =>
           $("#votes").html result
+          # Set the intensities
+          for row in $("#votes tr")
+            $row = $(row)
+            continue if $row.is(".notVoted, .hidden")
+            intensity = Number($row.attr("data-intensity"))
+            # Hex #A3A3F9 ($lightBlue) -- the most intense blue we will use for the highest votes
+            $row.css("background-color", "rgba(163, 163, 249, #{intensity})")
           @last_update = Number($("#votes table").attr("data-last-update"))
         409: (result) =>
           alert result.responseText

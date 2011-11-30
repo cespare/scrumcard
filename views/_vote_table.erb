@@ -1,17 +1,21 @@
 <%# Vote table partial. Expects:
   last_update - the time (milliseconds) of the previous update
-  votes - hash of username -> vote
+  votes - hash of username -> [vote_index, vote_value]
+  vote_choices - array of possible votes
   current_user
   voting_complete - whether the voting is finished
 %>
 <table data-last-update="<%= last_update %>">
-  <% votes.each do |user, vote| %>
+  <% votes.each do |user, vote_data| %>
+    <% vote_index, vote_value = vote_data %>
     <% classes = [] %>
-    <% classes << "notVoted" if vote.empty? %>
+    <% classes << "notVoted" if vote_value.empty? %>
     <% classes << "currentUser" if user == current_user %>
     <% classes << "hidden" unless voting_complete || user == current_user %>
-    <tr class="<%= classes.join(" ") %>">
-      <td class="user"><%= user %></td><td class="vote"><%= vote %></td>
+    <%# We want intensity to be 0.2 for the smallest vote choice (0), and 1.0 for the 'largest' (?) %>
+    <% intensity = 0.2 + (1 - 0.2) / (vote_choices.size - 1) * vote_index %>
+    <tr class="<%= classes.join(" ") %>" data-intensity="<%= intensity.round(2) %>">
+      <td class="user"><%= user %></td><td class="vote"><%= vote_value %></td>
     </tr>
   <% end %>
 </table>
