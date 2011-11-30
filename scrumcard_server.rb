@@ -40,8 +40,7 @@ module ScrumCard
   end
 
   class Room
-    attr_accessor :last_update
-    attr_reader :users
+    attr_reader :users, :last_update, :last_result, :last_vote
 
     # A room must have a user to be initialized
     def initialize(username, guid, logger)
@@ -50,6 +49,8 @@ module ScrumCard
       @logger = logger
       @expiration = Time.at(Time.now + 24 * 60 * 60) # Expire after 1 day
       @last_update = Time.now
+      @last_vote = 0
+      @last_result = []
     end
 
     def heartbeat(username) @users[username].heartbeat end
@@ -58,7 +59,7 @@ module ScrumCard
 
     # Get a view of the users and votes where the votes are hidden unless they are all cast
     # We also pass back the index in the VALID_VOTES array (this is used to create a color for the vote).
-    def votes(current_user)
+    def votes(current_user = nil)
       result = {}
       @users.each do |name, user|
         if all_voted? || name == current_user
@@ -83,6 +84,10 @@ module ScrumCard
       raise Error, "Voting has ended." if all_voted?
       raise Error, "#{username} is not present in this room" unless @users.include? username
       @users[username].cast_vote value
+      if all_voted?
+        @last_vote = Time.now
+        @last_result = votes.values.map(&:last).map { |s| Integer(s) rescue nil }.compact
+      end
       @last_update = Time.now
     end
 
@@ -180,6 +185,16 @@ module ScrumCard
       erb :_vote_table, :layout => false, :locals => {
           :last_update => room.last_update.to_i, :votes => room.votes(current_user),
           :vote_choices => VALID_VOTES, :current_user => current_user, :voting_complete => room.all_voted?
+      }
+    end
+
+    # Get the result of the last vote
+    get "/api/results/:room/latest" do |room_name|
+      room = @rooms[room_name]
+      halt 400, "No room #{room_name}" unless room
+      return 304 if params[:last_vote].to_i >= room.last_vote.to_i
+      erb :_results, :layout => false, :locals => {
+          :last_vote => room.last_vote.to_i, :results => room.last_result
       }
     end
 

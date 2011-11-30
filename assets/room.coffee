@@ -3,7 +3,7 @@ class window.Room
 
   constructor: (@name) ->
     console.log "creating new room: #{@name}"
-    @last_update = 0
+    [@last_update, @last_vote] = [0, 1]
     @maybeRefreshResults()
     Util.setInterval @HEARTBEAT_SECONDS * 1000, => @maybeRefreshResults()
     $("#choices select").on "change", (e) => @onVote(e)
@@ -33,6 +33,17 @@ class window.Room
           # server update time is no more recent than our own recorded last update time.
           return
         # 400: => # This happens when the room is cleaned up. Take care of this later.
+    # TODO(caleb): Should get rid of the copy-pasta
+    $.ajax
+      type: "get"
+      url: "/api/results/#{@name}/latest?last_vote=#{@last_vote}"
+      statusCode:
+        200: (result) =>
+          $("#result").html result
+          @last_vote = Number($("#result table").attr("data-last-vote"))
+          console.log @last_vote
+        304: =>
+          return
 
   onVote: (event) ->
     $.ajax

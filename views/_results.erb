@@ -1,0 +1,15 @@
+<%# Last results. Just some numbers for now.
+  # TODO(caleb): Put in a histogram!
+  last_vote - the time (milliseconds) of the previous vote
+  results - array of votes
+%>
+<% mean = (results.reduce(&:+).to_f / results.size).round 1 %>
+<% median = results.sort[results.size / 2] %>
+<table data-last-vote="<%= last_vote %>">
+  <tr>
+    <td class="metric">mean</td><td class="value"><%= mean %></td>
+  </tr>
+  <tr>
+    <td class="metric">median</td><td class="value"><%= median %></td>
+  </tr>
+</table>
