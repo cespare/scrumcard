@@ -3,6 +3,10 @@ scrumcard
 
 A web app for planning poker.
 
+Here's a screenshot:
+
+![Screenshot](https://github.com/cespare/scrumcard/raw/master/public/screenshot.png)
+
 Installation
 ------------
 
