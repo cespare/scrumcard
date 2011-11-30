@@ -2,6 +2,7 @@ TODO
 ====
 
 * Histogram
+* Update the Rooms view with ajax to see when other people create rooms without refreshing
 
 DONE!
 =====
