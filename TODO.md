@@ -6,6 +6,7 @@ TODO
 * Update the Rooms view with ajax to see when other people create rooms without refreshing
 * Two columns for displaying results
 * Login with email; retrieve gravatars to go with the username
+* Investigate long-polling options that aren't too difficult to implement and work on phones
 
 DONE!
 =====
