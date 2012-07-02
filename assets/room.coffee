@@ -46,11 +46,10 @@ class window.Room
           return
 
   onVote: (event) ->
-    window.e = event
     $.ajax
       type: "post"
       url: "/api/rooms/#{@name}"
-      data: $.toJSON { vote: event.target.innerText }
+      data: $.toJSON { vote: $(event.target).text() }
       contentType: "application/json"
       success: => @maybeRefreshResults()
 

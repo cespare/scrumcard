@@ -10,7 +10,7 @@ require "erb"
 require "stylus"
 
 module ScrumCard
-  VALID_VOTES = [0, 1, 2, 3, 5, 8, 13].map(&:to_s) << "?"
+  VALID_VOTES = %w[0 1 2 3 5 8 13 ?]
   HEARTBEAT_SECONDS = 1
   USER_TIMEOUT_SECONDS = 20
   class Error < RuntimeError; end
