@@ -113,6 +113,10 @@ module ScrumCard
 
     LOGIN_WHITELIST = [%r[^js/], %r[^css/], %r[^login], /favicon/]
 
+    configure :development do
+      enable :logging
+    end
+
     def initialize
       super
       Stylus.use :nib
