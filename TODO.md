@@ -12,9 +12,6 @@ TODO
 * Bug: Sometimes voting appears to have no effect. See if we can determine why...maybe we need to retry on
   failure or something?
 * Scrub debugging logging statements in the coffeescript.
-
-DONE!
-=====
-* Rename "reset" to make it clear that it resets the room
-* Colors for votes to make the distribution quicker to see
-* Buttons for voting instead of menu (fixes a bunch of UX issues)
+* Rewrite in Golang + socket.io
+* A 'show votes' button
+* A 'pester everyone who hasn't voted' button.
