@@ -15,3 +15,4 @@ TODO
 * Rewrite in Golang + socket.io
 * A 'show votes' button
 * A 'pester everyone who hasn't voted' button.
+* Bug(ish): the votes are re-hidden when someone joins the room.
